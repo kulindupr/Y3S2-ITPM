@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import { Link } from 'react-router-dom';  // Import Link from react-router-dom
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import JobListing from '../components/JobListing';
@@ -28,9 +29,16 @@ const Home = () => {
         <JobListing />
       </div>
 
+      {/* Jobs Button */}
+      <div className="text-center my-4">
+        <Link to="/internshipForm">
+          <button className="btn btn-primary">Jobs</button>
+        </Link>
+      </div>
+
       {/* Add space between JobListing and AboutUs */}
       <div className="my-16 md:my-24 lg:my-32"></div> {/* Adjust space based on screen size */}
-      
+
       {/* About Us Section */}
       <div ref={aboutUsRef}>
         <AboutUs />
