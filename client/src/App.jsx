@@ -9,6 +9,8 @@ import { AppContext } from './context/AppContext';
 import CVForm from './components/CVForm';
 import CVPreview from './components/CVPreview';
 import AiAsistant from './pages/AiAsistant';
+import InternshipForm from './pages/InternshipForm';
+
 
 const App = () => {
   const { showRecruitersLogin } = useContext(AppContext);
@@ -20,6 +22,11 @@ const App = () => {
       <Routes>
         <Route path='/' element={<Home/>}/>
         <Route path='/apply-job/:id' element={<ApplyJob/>}/>
+
+        <Route path='/applications' element={<Applications/>}/>
+        <Route path='/internshipForm' element={<InternshipForm/>}/>
+        
+
         <Route path='applications' element={<Applications/>}/>
         <Route path='aiAsistant' element={<AiAsistant/>}/>
         <Route path='/' element={<Home />} />
@@ -27,6 +34,7 @@ const App = () => {
         <Route path='/applications' element={<Applications />} />
         <Route path='/cv-form' element={<CVForm setCvData={setCvData} />} />
         <Route path='/cv-preview' element={<CVPreview data={cvData} />} />
+
       </Routes>
     </div>
   );
