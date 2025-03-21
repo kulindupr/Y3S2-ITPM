@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Link } from 'react-router-dom';  // Import Link from react-router-dom
+
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
 import JobListing from '../components/JobListing';

@@ -9,6 +9,7 @@ import { AppContext } from './context/AppContext';
 import CVForm from './components/CVForm';
 import CVPreview from './components/CVPreview';
 import AiAsistant from './pages/AiAsistant';
+import InternshipForm from './pages/InternshipForm';
 
 
 const App = () => {
