@@ -44,6 +44,14 @@ const Navbar = ({ scrollToAboutUs }) => {
               Applied Jobs
             </Link>
 
+            {/* Applied Jobs link */}
+            <Link
+              to="/aiAsistant"
+              className="text-gray-700 font-semibold hover:text-blue-600 transition-all duration-300"
+            >
+              Ai Asistant
+            </Link>
+
             <p className="text-gray-600">|</p>
 
             <p className='max-sm:hidden text-gray-700'>
