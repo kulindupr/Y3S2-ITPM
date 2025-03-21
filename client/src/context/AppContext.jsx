@@ -20,7 +20,7 @@ export const AppContextProvider = (props) => {
         setSearchFilter,searchFilter,
         isSearched,setIsSearched,
         internships,
-        showRecruitersLogin,setSearchFilter,
+        showRecruitersLogin,
         setShowRecruitersLogin
          // Make sure internships is included here
     };
