@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate} from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
 import Loading from '../components/Loading';
 import Navbar from '../components/Navbar';
@@ -8,8 +8,10 @@ import kconvert from 'k-convert';
 import moment from 'moment';
 import Footer from '../components/Footer';
 import JobCard from '../components/JobCard';
+import ApplyInternship from './ApplyInternship';
 
 const ApplyJob = () => {
+  const navigate = useNavigate();
   const { id } = useParams(); // Get internship ID from URL
   const [internshipData, setInternshipData] = useState(null);
   const { internships } = useContext(AppContext); // Get internships from context
@@ -63,7 +65,7 @@ const ApplyJob = () => {
 
         {/* Apply Button */}
        <div className="flex justify-between items-center mt-6">
-        <button className="cursor-pointer bg-blue-500 text-white px-6 py-2 rounded-lg font-medium border-2 border-blue-500 transition-all duration-300 hover:bg-transparent hover:text-blue-500">
+        <button onClick={() => navigate(`/applicationForm/${internshipData._id}`)} className="cursor-pointer bg-blue-500 text-white px-6 py-2 rounded-lg font-medium border-2 border-blue-500 transition-all duration-300 hover:bg-transparent hover:text-blue-500">
            Apply Now
         </button>
           <p className="text-gray-500 text-sm">
@@ -76,7 +78,7 @@ const ApplyJob = () => {
         <div className='w-full lg:w-2/3'>
           <h2 className='font-bold text-2xl mb-4'>Internship Description</h2>
           <div className='rich-text' dangerouslySetInnerHTML={{__html:internshipData.description}}></div>
-          <button className="cursor-pointer bg-blue-500 text-white px-6 py-2 rounded-lg font-medium border-2 border-blue-500 transition-all duration-300 hover:bg-transparent hover:text-blue-500 mt-10">
+          <button onClick={() => navigate(`/applicationForm/${internshipData._id}`)} className="cursor-pointer bg-blue-500 text-white px-6 py-2 rounded-lg font-medium border-2 border-blue-500 transition-all duration-300 hover:bg-transparent hover:text-blue-500 mt-10">
            Apply Now
         </button>
         </div>
