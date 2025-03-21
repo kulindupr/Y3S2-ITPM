@@ -1,13 +1,6 @@
 
-import React from 'react'
-import {Route,Routes} from 'react-router-dom'
-import Home from './pages/Home'
-import ApplyJob from './pages/ApplyJob'
-import Applications from './pages/Applications'
-import AiAsistant from './pages/AiAsistant'
-
 import React, { useContext, useState } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import {Route,Routes} from 'react-router-dom'
 import Home from './pages/Home';
 import ApplyJob from './pages/ApplyJob';
 import Applications from './pages/Applications';
@@ -15,6 +8,7 @@ import RecruiterLogin from './components/RecruiterLogin';
 import { AppContext } from './context/AppContext';
 import CVForm from './components/CVForm';
 import CVPreview from './components/CVPreview';
+import AiAsistant from './pages/AiAsistant';
 
 const App = () => {
   const { showRecruitersLogin } = useContext(AppContext);
