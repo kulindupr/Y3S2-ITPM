@@ -5,7 +5,7 @@ import Hero from '../components/Hero';
 import JobListing from '../components/JobListing';
 import AboutUs from '../components/AboutUs';
 import Footer from '../components/Footer';
-
+import { Link } from "react-router-dom";
 const Home = () => {
   const jobListingRef = useRef(null);
   const aboutUsRef = useRef(null);  // Reference for About Us section
@@ -28,6 +28,12 @@ const Home = () => {
       <div ref={jobListingRef}>
         <JobListing />
       </div>
+{/*CV button */}
+      <Link to="/cv-form">
+      <button className="bg-blue-500 text-white px-4 py-2 rounded">
+    Create Your CV
+    </button>
+      </Link>
 
       {/* Jobs Button */}
       <div className="text-center my-4">
