@@ -1,4 +1,3 @@
-
 import React, { useContext, useState } from 'react';
 import {Route,Routes} from 'react-router-dom'
 import Home from './pages/Home';
@@ -14,6 +13,7 @@ import Dashboard from './pages/Dashboard';
 import AddJobs from './pages/AddJobs';
 import ManageJobs from './pages/ManageJobs';
 import ViewApplications from './pages/ViewApplications';
+import 'quill/dist/quill.snow.css';
 
 
 const App = () => {
@@ -43,7 +43,7 @@ const App = () => {
         <Route path='/dashboard' element={<Dashboard />} >
             <Route path='add-job' element={<AddJobs />} />
             <Route path='manage-jobs' element={<ManageJobs />} />
-            <Route path='view-appication' element={<ViewApplications />} />
+            <Route path='view-applications' element={<ViewApplications />} />
         </Route>
 
 
