@@ -9,7 +9,7 @@ export const AppContextProvider = (props) => {
     });
 
     const [isSearched, setIsSearched] = useState(false);
-   // const[internships,setInternships] = useState([])
+    const[internships,setInternships] = useState([])
 
     const [showRecruitersLogin, setShowRecruitersLogin] = useState(false);
 
@@ -19,7 +19,7 @@ export const AppContextProvider = (props) => {
     const value = {
         setSearchFilter,searchFilter,
         isSearched,setIsSearched,
-        internships,
+        internships,setInternships,
         showRecruitersLogin,
         setShowRecruitersLogin
          // Make sure internships is included here

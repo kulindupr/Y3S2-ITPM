@@ -10,6 +10,10 @@ import CVForm from './components/CVForm';
 import CVPreview from './components/CVPreview';
 import AiAsistant from './pages/AiAsistant';
 import InternshipForm from './pages/InternshipForm';
+import Dashboard from './pages/Dashboard';
+import AddJobs from './pages/AddJobs';
+import ManageJobs from './pages/ManageJobs';
+import ViewApplications from './pages/ViewApplications';
 
 
 const App = () => {
@@ -34,6 +38,15 @@ const App = () => {
         <Route path='/applications' element={<Applications />} />
         <Route path='/cv-form' element={<CVForm setCvData={setCvData} />} />
         <Route path='/cv-preview' element={<CVPreview data={cvData} />} />
+
+        {/* //asela */}
+        <Route path='/dashboard' element={<Dashboard />} >
+            <Route path='add-job' element={<AddJobs />} />
+            <Route path='manage-jobs' element={<ManageJobs />} />
+            <Route path='view-appication' element={<ViewApplications />} />
+        </Route>
+
+
 
       </Routes>
     </div>
