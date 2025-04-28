@@ -18,7 +18,9 @@ function RecruiterLogin() {
             <h1 className='text-center text-2xl text-neutral-700 font-medium'>Recruiter {state}</h1>
             <p className='text-sm'>Welcome back! Please Sign in to Continue</p>
             <>
-              {state !=='Login' && ( <div className='border px-4 py-2 gap-2 rounded-full mt-5 p-4 flex  items-center'>
+
+              {state !=='Login' && ( 
+                <div className='border px-4 py-2 gap-2 rounded-full mt-5 p-4 flex  items-center'>
                     <img src={assets.person_icon} alt=""/>
                     <input  className="outline-none"onChange ={e=>setName(e.target.value)} value={name} type='text' placeholder='Company Name' required></input>
                  </div>) }
@@ -36,6 +38,11 @@ function RecruiterLogin() {
                 <button className='bg-blue-600 text-white  w-full content-center  py-2  rounded-full mt-5    items-center'>
                     {state ==='Login' ? 'login' : 'Create Account'}
                 </button>
+
+                {state ==='Login'
+               ? <p>Don't have an account?<spam  onClick={()=>setState("Sign Up")}>Sign Up</spam></p>
+                :<p>Aready have an account?<span onClick={()=>setState("Login")}>Login</span></p>
+              }
         </form>
         
         
