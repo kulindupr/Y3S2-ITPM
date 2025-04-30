@@ -35,13 +35,14 @@ InternLink offers a streamlined platform where:
 | Hosting       | Vercel / Heroku / Firebase Hosting (Specify) |
 
 👥 Team Members
-Rubasinghe K.P – Full-Stack Developer / Project Coordinator
 
-Wanigabadu A.K – Frontend Developer
+Rubasinghe K.P
 
-S.M.A.P.T Nuwantha – Backend & AI Integration
+Wanigabadu A.K
 
-Apsari J.K – UI/UX Designer & QA
+S.M.A.P.T Nuwantha
+
+Apsari J.K
 
 📄 License
 This project is part of the IT Project Management (ITPM) coursework and is intended for academic purposes only.
