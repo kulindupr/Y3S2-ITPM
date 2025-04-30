@@ -34,9 +34,14 @@ InternLink offers a streamlined platform where:
 | AI Integration| Python + RAG Architecture           |
 | Hosting       | Vercel / Heroku / Firebase Hosting (Specify) |
 
-## 🚀 How to Run Locally
+👥 Team Members
+Rubasinghe K.P – Full-Stack Developer / Project Coordinator
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-username/internlink.git
-   cd internlink
+Wanigabadu A.K – Frontend Developer
+
+S.M.A.P.T Nuwantha – Backend & AI Integration
+
+Apsari J.K – UI/UX Designer & QA
+
+📄 License
+This project is part of the IT Project Management (ITPM) coursework and is intended for academic purposes only.
