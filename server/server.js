@@ -21,7 +21,7 @@ app.get('/',(req,res)=>res.send('API Working!'));
 app.get("/debug-sentry", function mainHandler(req, res) {
     throw new Error("My first Sentry error!");
   });
-  app.post('/webhook', celeryWebhook) 
+  app.post('/webhooks', celeryWebhook) 
 
 //port
 const PORT=process.env.PORT || 5000;
