@@ -1,4 +1,3 @@
-
 import React, { useContext, useState } from 'react';
 import {Route,Routes} from 'react-router-dom'
 import Home from './pages/Home';
@@ -10,6 +9,11 @@ import CVForm from './components/CVForm';
 import CVPreview from './components/CVPreview';
 import AiAsistant from './pages/AiAsistant';
 import InternshipForm from './pages/InternshipForm';
+import Dashboard from './pages/Dashboard';
+import AddJobs from './pages/AddJobs';
+import ManageJobs from './pages/ManageJobs';
+import ViewApplications from './pages/ViewApplications';
+import 'quill/dist/quill.snow.css';
 
 
 const App = () => {
@@ -34,6 +38,15 @@ const App = () => {
         <Route path='/applications' element={<Applications />} />
         <Route path='/cv-form' element={<CVForm setCvData={setCvData} />} />
         <Route path='/cv-preview' element={<CVPreview data={cvData} />} />
+
+        {/* //asela */}
+        <Route path='/dashboard' element={<Dashboard />} >
+            <Route path='add-job' element={<AddJobs />} />
+            <Route path='manage-jobs' element={<ManageJobs />} />
+            <Route path='view-applications' element={<ViewApplications />} />
+        </Route>
+
+
 
       </Routes>
     </div>
