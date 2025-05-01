@@ -51,8 +51,35 @@ export const registerCompany = async (req, res) => {
 }
 
 //company login 
-export const loginCompany = async () => {
+export const loginCompany = async (req,res) => {
+    const {email,password} = req.body;
+    try{
+        const company = await Company.findOne({email})
+
+        if(bcrypt.compare(password,company.password)){
+            res.json({success:true,
+                comapny:{
+                    _id:company._id,
+                    name:company.name,
+                    email:company.email,
+                    image:company.image,
+                    token:generateToken(company._id)
+
+                }
+            })
+
+        }
+        else{
+            res.json({success:false,message:"Invalid credentials"})
+        }
+
+
+    }catch (error) {
+        res.json({success:false,message:"Error in company login"})
+    }
+
 }
+
 
 //get company data
 export const getCompanyData = async (req, res) => {
@@ -62,6 +89,10 @@ export const getCompanyData = async (req, res) => {
 //post job
 export const postJob = async (req, res) => {
 
+    const{title,description,salary,location} = req.body;
+
+    const companyId = req.company._id;
+    console.log(companyId ,{title,description,salary,location});
 }
 
 //get compant job Applications
