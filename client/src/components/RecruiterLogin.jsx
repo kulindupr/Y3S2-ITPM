@@ -2,10 +2,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { assets } from '../assets/assets'
 import { AppContext}from '../context/AppContext'
+import axios from 'axios'
 
 function RecruiterLogin() {
 
-    const [state,setState]=useState('Loging')
+    const [state,setState]=useState('Login')
     const[name,setName]=useState('')
     const[password,setPassword]=useState('')
     const[email,setEmail]=useState('')
@@ -14,14 +15,32 @@ function RecruiterLogin() {
 
     const[isTextDataSubmited,setIsTextDataSubmited]=useState(false)
 
-    const {setShowRecruitersLogin}=useContext(AppContext)
+    const {setShowRecruitersLogin,backendUrl}=useContext(AppContext)
 
 
     const onSubmitHandler=async(e)=>{
       e.preventDefault()
-      if(state==='Sign Up'&& !isTextDataSubmited){
+      if(state=='Sign Up'&& !isTextDataSubmited){
       setIsTextDataSubmited(true)   
     }
+    try {
+      if(state==='Login'){
+        const {data}= await axios.post(backendUrl+'/api/company/login',{
+          email,
+          password
+        })
+
+        if(data.success){
+          console.log(data)
+      }
+
+    }
+  }catch (error) {
+      
+    }
+    
+
+
   }
 
   useEffect(()=>{
@@ -64,7 +83,7 @@ function RecruiterLogin() {
              </div>
              <div className='border px-4 py-2 gap-2 rounded-full mt-5 p-4 flex  items-center'>
                 <img src={assets.lock_icon} alt=""/>
-                <input onChange ={e=>setPassword(e.target.value)} value={password} type='text' placeholder='Password' required></input>
+                <input onChange ={e=>setPassword(e.target.value)} value={password} type='password' placeholder='Password' required></input>
              </div>
         </>
           }
@@ -77,7 +96,7 @@ function RecruiterLogin() {
                 </button>
 
                 {state ==='Login'
-               ? <p className='mt-d text-center'>Don't have an account?<spam className='text-blue-600 cursor-pointer' onClick={()=>setState("Sign Up")}>Sign Up</spam></p>
+               ? <p className='mt-d text-center'>Don't have an account?<span className='text-blue-600 cursor-pointer' onClick={()=>setState("Sign Up")}>Sign Up</span></p>
                 :<p className='mt-d text-center'>Aready have an account?<span className='text-blue-600 cursor-pointer'onClick={()=>setState("Login")}>Login</span></p>
               }
 

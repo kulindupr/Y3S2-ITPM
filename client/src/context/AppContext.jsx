@@ -1,9 +1,14 @@
-import { createContext, useState } from "react";
-import { internships } from "../assets/assets"; // Ensure this path is correct
+import { createContext, useState,useEffect } from "react";
+import { internships as mockInternships } from "../assets/assets"; // Ensure this path is correct
+
+
 //jobData={internships}
 export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
+
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
     const [searchFilter, setSearchFilter] = useState({
         title: ''
     });
@@ -13,15 +18,22 @@ export const AppContextProvider = (props) => {
 
     const [showRecruitersLogin, setShowRecruitersLogin] = useState(false);
 
-    
+    const[companyToken,setCompanyToken] = useState(null)
+    const[companyData,setCompanyData] = useState(null)
 
+    useEffect(() => {
+        setInternships(mockInternships);
+    }, []);
     // Provide internships in the context value
     const value = {
         setSearchFilter,searchFilter,
         isSearched,setIsSearched,
         internships,setInternships,
         showRecruitersLogin,
-        setShowRecruitersLogin
+        setShowRecruitersLogin,
+        companyToken,setCompanyToken,
+        companyData,setCompanyData,
+        backendUrl
          // Make sure internships is included here
     };
 
