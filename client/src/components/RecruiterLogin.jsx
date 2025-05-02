@@ -17,6 +17,7 @@ function RecruiterLogin() {
     const[image,setImage]=useState(false)
 
     const[isTextDataSubmited,setIsTextDataSubmited]=useState(false)
+
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
