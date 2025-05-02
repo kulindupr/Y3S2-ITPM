@@ -6,7 +6,7 @@ import JobCard from './JobCard';  // Import the JobCard component
 const JobListing = () => {
   const { searchFilter, setSearchFilter } = useContext(AppContext);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6; // Set the number of items per page
+  const itemsPerPage = 8; // Set the number of items per page
 
   // Function to get relevant subcategories based on selected category
   const getSubcategories = () => {
