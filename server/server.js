@@ -9,7 +9,7 @@ import { celeryWebhook } from './controllers/webhooks.js';
 import companyRoutes from './routes/companyRoutes.js';
 import connectCloudinary from './config/cloudinary.js';
 import jobRoutes from './routes/jobRotes.js';
-import userRoutes from './routes/userroutes.js';
+import userRoutes from './routes/userRoutes.js';
 import cvRoutes from './routes/cvRoutes.js';
 import {clerkMiddleware} from '@clerk/express';
 

@@ -15,6 +15,7 @@ import ManageJobs from './pages/ManageJobs';
 import ViewApplications from './pages/ViewApplications';
 import 'quill/dist/quill.snow.css';
 import { ToastContainer, toast } from 'react-toastify';
+import ApplyJobForm from './pages/ApplyJobForm';
 
 
 const App = () => {
@@ -37,6 +38,7 @@ const App = () => {
         <Route path='aiAsistant' element={<AiAsistant/>}/>
         <Route path='/' element={<Home />} />
         <Route path='/apply-job/:id' element={<ApplyJob />} />
+        <Route path='/apply-job/:id/apply' element={<ApplyJobForm standalone={true} />} />
         <Route path='/applications' element={<Applications />} />
         <Route path='/cv-form' element={<CVForm setCvData={setCvData} />} />
         <Route path='/cv-preview' element={<CVPreview data={cvData} />} />
