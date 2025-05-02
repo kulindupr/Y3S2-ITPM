@@ -4,7 +4,17 @@ import {useNavigate} from 'react-router-dom'
 
 const JobCard = ({job }) => {
 
-  const naviagate = useNavigate()
+  const navigate = useNavigate()
+
+  // Helper to check if _id is a valid MongoDB ObjectId
+  const isMongoId = (id) => typeof id === 'string' && id.length === 24 && /^[a-fA-F0-9]+$/.test(id);
+
+  const handleNavigate = () => {
+    // Prefer MongoDB _id if available, else fallback
+    const idToUse = isMongoId(job._id) ? job._id : (job.mongoId || job._id);
+    navigate(`/apply-job/${idToUse}`);
+    scrollTo(0,0);
+  }
 
   return (
     <div className=' p-6 shadow-lg rounded-lg bg-blue-50'>
@@ -17,8 +27,8 @@ const JobCard = ({job }) => {
        </div>
        <p className='text-gray-500 text-sm mt-4' dangerouslySetInnerHTML={{__html:job.description.slice(0,150)}}></p>
        <div className='mt-4 flex gap-4 text-sm'>
-        <button onClick={() => {naviagate(`/apply-job/${job._id}`); scrollTo(0,0)}} className='cursor-pointer bg-gradient-to-r from-blue-500 via-blue-400 to-blue-500 text-white px-4 py-2 rounded'>Apply now</button>
-        <button onClick={() => {naviagate(`/apply-job/${job._id}`); scrollTo(0,0)}} className=' cursor-pointer text-gray-500 border border-gray-500 rounded px-4 py-2'>Learn More</button>
+        <button onClick={handleNavigate} className='cursor-pointer bg-gradient-to-r from-blue-500 via-blue-400 to-blue-500 text-white px-4 py-2 rounded'>Apply now</button>
+        <button onClick={handleNavigate} className=' cursor-pointer text-gray-500 border border-gray-500 rounded px-4 py-2'>Learn More</button>
        </div>
     </div>
   )
