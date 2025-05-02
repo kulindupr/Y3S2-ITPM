@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG AI Assistant</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .question-form {
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .answer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: red;
+            background-color: #ffe6e6;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <h1>RAG AI Assistant</h1>
+    <div class="question-form">
+        <textarea id="question" rows="4" placeholder="Ask your question here..."></textarea>
+        <button id="askButton" onclick="askQuestion()">Ask Question</button>
+    </div>
+    <div id="loading" class="loading" style="display: none;">Processing your question...</div>
+    <div id="answer" class="answer" style="display: none;"></div>
+    <div id="error" class="error" style="display: none;"></div>
+
+    <script>
+        async function askQuestion() {
+            const question = document.getElementById('question').value;
+            const answerDiv = document.getElementById('answer');
+            const errorDiv = document.getElementById('error');
+            const loadingDiv = document.getElementById('loading');
+            const askButton = document.getElementById('askButton');
+            
+            // Clear previous results and show loading
+            answerDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+            loadingDiv.style.display = 'block';
+            askButton.disabled = true;
+            
+            try {
+                console.log('Sending question:', question);
+                const response = await fetch('http://localhost:8000/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+                
+                console.log('Response status:', response.status);
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${responseText}`);
+                }
+                
+                const data = JSON.parse(responseText);
+                console.log('Parsed response:', data);
+                
+                if (data.answer) {
+                    answerDiv.style.display = 'block';
+                    answerDiv.textContent = data.answer;
+                } else {
+                    throw new Error('No answer received from server');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Error: ' + error.message;
+            } finally {
+                loadingDiv.style.display = 'none';
+                askButton.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
