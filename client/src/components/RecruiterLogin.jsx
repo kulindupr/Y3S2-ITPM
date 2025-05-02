@@ -38,14 +38,12 @@ function RecruiterLogin() {
                 if (data.success) {
                     // Save token and company info
 
-                    console.log(data);
+                  
                     setCompanyData(data.company)
                     setCompanyToken(data.token)
                     localStorage.setItem('companyToken', data.token);
                     localStorage.setItem('companyInfo', JSON.stringify(data.company));
                     setShowRecruitersLogin(false);
-                   
-               
                     navigate('/dashboard')
                    
                
@@ -86,6 +84,28 @@ function RecruiterLogin() {
                     window.location.reload();
                 } else {
                     setError(data.message);
+                }
+            }else{
+                const formData = new FormData()
+                formData.append('name', name)
+                formData.append('password', password)
+                formData.append('email', email)
+                formData.append('image', image)
+
+                const {data} = await axios.post(`${backendUrl}/api/company/register`,formData)
+
+                if(data.success){
+                   
+                    setCompanyData(data.company)
+                    setCompanyToken(data.token)
+                    localStorage.setItem('companyToken', data.token);
+                    localStorage.setItem('companyInfo', JSON.stringify(data.company));
+                    setShowRecruitersLogin(false);
+                    navigate('/dashboard')
+                   
+                
+                }else{
+                    toast.error(data.message)
                 }
             }
         } catch (error) {
