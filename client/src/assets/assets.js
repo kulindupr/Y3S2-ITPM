@@ -201,7 +201,7 @@ export const viewApplicationsPageData = [
     { _id: 7, name: "Richard Sanford", jobTitle: "Marketing Manager", location: "Chennai", imgSrc: profile_img },
 ];
 
-export const internships = [
+export const jobsData = [
     {
         _id: '1',
         title: "Software Developer Intern",

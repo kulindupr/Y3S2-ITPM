@@ -1,5 +1,5 @@
 import { createContext, useState,useEffect } from "react";
-import { internships as mockInternships } from "../assets/assets"; // Ensure this path is correct
+import { jobsData } from "../assets/assets"; // Ensure this path is correct
 
 
 //jobData={internships}
@@ -15,14 +15,13 @@ export const AppContextProvider = (props) => {
 
     const [isSearched, setIsSearched] = useState(false);
     const[internships,setInternships] = useState([])
-
     const [showRecruitersLogin, setShowRecruitersLogin] = useState(false);
 
     const[companyToken,setCompanyToken] = useState(null)
     const[companyData,setCompanyData] = useState(null)
 
     useEffect(() => {
-        setInternships(mockInternships);
+        setInternships(jobsData);
     }, []);
     // Provide internships in the context value
     const value = {
