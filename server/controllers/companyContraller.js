@@ -1,4 +1,3 @@
-
 import Company from "../models/Company.js";
 import bcrypt from "bcrypt";
 import generateToken from "../utils/generateToken.js";
@@ -109,31 +108,33 @@ export const getCompanyData = async (req, res) => {
 
 //post job
 export const postJob = async (req, res) => {
+    const { title, description, salary, location, category, subcategory, companyId } = req.body;
 
-    const{title,description,salary,location,level,category} = req.body;
-
-    const companyId = req.company._id;
-    try{
+    try {
+        // Use the provided companyId or create a new job with the hardcoded company details
         const newJob = await Job({
             title,
             description,
             salary,
             location,
-            companyId,
-            date:Date.now(),
-            level,
-            category
+            companyId: companyId || {
+                _id: "670e4d25ca9fda8f1bf359b9",
+                name: "Tech Solutions Inc",
+                email: "hr@techsolutions.com",
+                image: "/company-logo.png"
+            },
+            date: Date.now(),
+            category,
+            subcategory,
+            visible: true
+        });
 
-        })
         await newJob.save();
-        res.json({success:true,newJob})
-
-    }catch (error) {
-        res.json({success:false,message:"Error in posting job"})
-
+        res.json({ success: true, newJob });
+    } catch (error) {
+        console.error("Error in posting job:", error);
+        res.json({ success: false, message: "Error in posting job" });
     }
-
-    
 }
 
 //get compant job Applications
