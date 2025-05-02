@@ -1,4 +1,4 @@
-import logo from "./logo.svg";
+import logo from "./logo.png";
 import search_icon from "./search_icon.svg";
 import company_icon from "./company_icon.svg";
 import microsoft_logo from "./microsoft_logo.svg";
@@ -35,6 +35,8 @@ import adobe_logo from './adobe_logo.png'
 import amazon_logo from './amazon_logo.png'
 import AiAvatar from './AiAvatar.png'
 import linky from './linky.png'  
+import about from './aboutus.mp4'
+
 
 export const assets = {
     logo,
@@ -73,7 +75,8 @@ export const assets = {
     adobe_logo,
     amazon_logo,
     linky,
-    AiAvatar
+    AiAvatar,
+    about
 }
 
 export const JobCategories = [
