@@ -50,10 +50,14 @@ async def ask_question(query: QueryRequest):
             None, answer_question, query.question
         )
         logger.info("Question answered successfully")
-        return JSONResponse(content={"answer": response})
+        return JSONResponse(
+            content={"answer": response},
+            media_type="application/json; charset=utf-8"
+        )
     except Exception as e:
         logger.error(f"Error processing question: {str(e)}")
         return JSONResponse(
             status_code=500,
-            content={"answer": f"Error: {str(e)}"}
+            content={"answer": f"Error: {str(e)}"},
+            media_type="application/json; charset=utf-8"
         )
