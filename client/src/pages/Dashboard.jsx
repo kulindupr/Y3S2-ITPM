@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Outlet, useNavigate, NavLink } from 'react-router-dom';
 import { assets } from '../assets/assets';
+import { AppContext } from '../context/AppContext';
 
 const Dashboard = () => {
 
   const navigate = useNavigate();
   const companyInfo = JSON.parse(localStorage.getItem('companyInfo'));
+
+  const {companyData} = useContext(AppContext)
 
   return (
     <div className="min-h-screen">
@@ -13,17 +16,24 @@ const Dashboard = () => {
       <div className='shadow py-4'>
         <div className='px-5 flex justify-between items-center'>
           <img onClick={e => navigate ('/')} className='max-sm:w-32 cursor-pointer' src={assets.logo} alt="" />
-          <div className='flex items-center gap-3'>
-            <p className='max-sm:hidden'>Welcome, {companyInfo?.name || 'Recruiter'}</p>
-            <div className='relative group'>
-            <img className='w-8 boarder rounded-full' src= {assets.company_icon} alt="" />  
-            <div className='absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12'>
-              <ul className='lsit-none m-0 p-2 bg-white rounded-md border text-sm'>
-                <li className='py-1 px-2 cursor-pointer pr-10'>Logout</li>
-              </ul>
-            </div>
-            </div>
+          {companyData && (
+             <div className='flex items-center gap-3'>
+          
+             <p className='max-sm:hidden'>Welcome, {companyInfo?.name || 'Recruiter'}</p>
+             <div className='relative group'>
+             <img className='w-8 boarder rounded-full' src= {companyInfo?.image || 'Image'} alt="" />  
+             <div className='absolute hidden group-hover:block top-0 right-0 z-10 text-black rounded pt-12'>
+               <ul className='lsit-none m-0 p-2 bg-white rounded-md border text-sm'>
+                 <li className='py-1 px-2 cursor-pointer pr-10'>Logout</li>
+               </ul>
+             </div>
+             </div>
+             
           </div>
+
+
+          ) }
+         
         </div>
       </div>
 

@@ -18,7 +18,7 @@ import { ToastContainer, toast } from 'react-toastify';
 
 
 const App = () => {
-  const { showRecruitersLogin } = useContext(AppContext);
+  const { showRecruitersLogin ,companyToken} = useContext(AppContext);
   const [cvData, setCvData] = useState(null);
 
   return (
@@ -42,11 +42,17 @@ const App = () => {
         <Route path='/cv-preview' element={<CVPreview data={cvData} />} />
 
         {/* //asela */}
-        <Route path='/dashboard' element={<Dashboard />} >
+        {companyToken ? <>
+          <Route path='/dashboard' element={<Dashboard />} >
             <Route path='add-job' element={<AddJobs />} />
             <Route path='manage-jobs' element={<ManageJobs />} />
             <Route path='view-applications' element={<ViewApplications />} />
         </Route>
+        
+        </>:null
+        
+        }
+        
 
 
 

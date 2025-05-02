@@ -37,18 +37,12 @@ function RecruiterLogin() {
                 });
 
                 if (data.success) {
-                    // Save token and company info
-
-                  
                     setCompanyData(data.company)
                     setCompanyToken(data.token)
                     localStorage.setItem('companyToken', data.token);
                     localStorage.setItem('companyInfo', JSON.stringify(data.company));
                     setShowRecruitersLogin(false);
                     navigate('/dashboard')
-                   
-               
-                   
                 } else {
                     toast.error(data.message)
                 }
@@ -59,7 +53,6 @@ function RecruiterLogin() {
                     return;
                 }
 
-                // Handle Sign Up
                 if (!image) {
                     setError('Please upload company logo');
                     setLoading(false);
@@ -110,7 +103,12 @@ function RecruiterLogin() {
                 }
             }
         } catch (error) {
-            setError(error.response?.data?.message || 'An error occurred. Please try again.');
+            if (error.code === 'ERR_NETWORK' || error.message.includes('ECONNREFUSED')) {
+                setError('Backend server is not running. Please start the server.');
+                console.log("Backend server is not running at:", backendUrl);
+            } else {
+                setError(error.response?.data?.message || 'An error occurred. Please try again.');
+            }
         } finally {
             setLoading(false);
         }
