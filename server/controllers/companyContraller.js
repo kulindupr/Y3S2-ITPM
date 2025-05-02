@@ -1,3 +1,4 @@
+
 import Company from "../models/Company.js";
 import bcrypt from "bcrypt";
 import generateToken from "../utils/generateToken.js";
@@ -54,31 +55,42 @@ export const registerCompany = async (req, res) => {
 //company login 
 export const loginCompany = async (req,res) => {
     const {email,password} = req.body;
-    try{
-        const company = await Company.findOne({email})
 
-        if(bcrypt.compare(password,company.password)){
-            res.json({success:true,
-                comapny:{
-                    _id:company._id,
-                    name:company.name,
-                    email:company.email,
-                    image:company.image,
-                    token:generateToken(company._id)
-
-                }
-            })
-
-        }
-        else{
-            res.json({success:false,message:"Invalid credentials"})
-        }
-
-
-    }catch (error) {
-        res.json({success:false,message:"Error in company login"})
+    if (!email || !password) {
+        return res.json({success:false, message:"Please provide email and password"});
     }
 
+    try {
+        // Find company by email
+        const company = await Company.findOne({email});
+        
+        if (!company) {
+            return res.json({success:false, message:"Invalid credentials"});
+        }
+
+        // Compare password
+        const isMatch = await bcrypt.compare(password, company.password);
+        
+        if (!isMatch) {
+            return res.json({success:false, message:"Invalid credentials"});
+        }
+
+        // If password matches, send success response
+        res.json({
+            success:true,
+            company:{
+                _id:company._id,
+                name:company.name,
+                email:company.email,
+                image:company.image
+            },
+            token:generateToken(company._id)
+        });
+
+    } catch (error) {
+        console.error('Login error:', error);
+        res.json({success:false, message:"Error in company login"});
+    }
 }
 
 
@@ -171,3 +183,4 @@ export const changeVisibility = async (req, res) => {
     }
 
 }
+
