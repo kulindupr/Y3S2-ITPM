@@ -3,13 +3,3 @@
 AI: Hi there! How can I help you with your internship search today?
 
 User: what is business management
-[2025-05-02 23:58:14] User: hi
-AI: Hi there! How can I help you with your internship search today?
-
-User: wehat is car
-AI: Hi there! How can I help you with your internship search today?  I'm not sure what you mean by "wehat is car".  Did you have a question about internships?
-
-User: what is intern
-AI: An internship is a temporary work experience offered to students and recent graduates. It provides an opportunity to gain practical skills, explore a career field, and build a professional network. Internships can be paid or unpaid and typically last from a few weeks to several months. They can be in various fields, including IT, business, engineering, and more.  I can provide you with more details about IT internships specifically, if you'd like!
-
-User: what are the benifits of se

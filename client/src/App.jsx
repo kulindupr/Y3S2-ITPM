@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import ApplyJob from './pages/ApplyJob'
 import Applications from './pages/Applications'
@@ -12,10 +12,13 @@ import ViewApplications from './pages/ViewApplications'
 import 'quill/dist/quill.snow.css'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Ai from './components/ai-provider'
+import AiAssistant from './pages/AiAssistant'
 
 const App = () => {
 
   const { showRecruiterLogin, companyToken } = useContext(AppContext)
+  const location = useLocation();
 
   return (
     <div>
@@ -23,6 +26,7 @@ const App = () => {
       <ToastContainer />
       <Routes>
         <Route path='/' element={<Home />} />
+        <Route path='/ai-assistant' element={<AiAssistant />} />
         <Route path='/apply-job/:id' element={<ApplyJob />} />
         <Route path='/applications' element={<Applications />} />
         <Route path='/dashboard' element={<Dashboard />}>
@@ -35,6 +39,7 @@ const App = () => {
           }
         </Route>
       </Routes>
+      {location.pathname !== '/ai-assistant' && <Ai />}
     </div>
   )
 }
