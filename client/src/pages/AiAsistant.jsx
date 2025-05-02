@@ -1,194 +1,294 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Search, MessageSquare, User, ChevronDown, Plus, Send, Mic } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import '../aiAssistant.css';
+import { assets } from '../assets/assets';
 
-const InternLinkAIAssistant = () => {
-    const [input, setInput] = useState('');
-    const [messages, setMessages] = useState([]);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const messagesEndRef = useRef(null);
+const CHAT_STORAGE_KEY = 'ai-assistant-chats-v1';
 
-    const conversations = [
-        { id: 1, title: 'Form Conversion Example' },
-        { id: 2, title: 'SQL Branch Insertion Example' },
-        { id: 3, title: 'Form Conversion Request' },
-        { id: 4, title: 'Delete function review' },
-        { id: 5, title: 'Row Click Popup Load' },
-        { id: 6, title: 'Popup Implementation Issues' },
-        { id: 7, title: 'Row data to popup debug' },
-        { id: 8, title: 'New chat' },
-        { id: 9, title: 'Popup Data Not Displaying' },
-        { id: 10, title: 'Popup data not showing' },
-        { id: 11, title: 'Branch Info Popup Fix' },
-        { id: 12, title: 'Sidebar Menu Code' },
-    ];
+function loadChats() {
+  try {
+    const data = localStorage.getItem(CHAT_STORAGE_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch {
+    return [];
+  }
+}
+function saveChats(chats) {
+  localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(chats));
+}
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
+function App() {
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [chats, setChats] = useState(loadChats()); // [{id, title, history: [{role, content}]}]
+  const [activeChatIdx, setActiveChatIdx] = useState(chats.length ? 0 : -1);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const chatEndRef = useRef(null);
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
+  // On first load, if no chats exist, create a new chat
+  useEffect(() => {
+    if (chats.length === 0) {
+      setChats([{ id: Date.now(), title: 'New Chat', history: [] }]);
+      setActiveChatIdx(0);
+    }
+    // eslint-disable-next-line
+  }, []);
 
-    const handleSendMessage = (e) => {
-        e.preventDefault();
-        if (input.trim()) {
-            setMessages([...messages, { text: input, sender: 'user' }]);
-            setInput('');
+  // Save chats to localStorage whenever they change
+  useEffect(() => {
+    saveChats(chats);
+  }, [chats]);
 
-            // Simulate AI response
-            setTimeout(() => {
-                setMessages(prev => [...prev, {
-                    text: "I'm InternLink AI Assistant. How can I help with your internship search today?",
-                    sender: 'ai'
-                }]);
-            }, 1000);
+  // Auto-scroll to latest message
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [activeChatIdx, chats, loading]);
+
+  // Filter chats based on search query
+  const filteredChats = chats.filter(chat => 
+    chat.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Start a new chat
+  const handleNewChat = () => {
+    setChats(prev => [{ id: Date.now(), title: 'New Chat', history: [] }, ...prev]);
+    setActiveChatIdx(0);
+    setInput('');
+    setError('');
+  };
+
+  // Switch to a previous chat
+  const handleSelectChat = idx => {
+    setActiveChatIdx(idx);
+    setInput('');
+    setError('');
+  };
+
+  // Update chat title (first user message)
+  const updateChatTitle = (idx, firstMsg) => {
+    setChats(prev => prev.map((c, i) => i === idx ? { ...c, title: firstMsg.slice(0, 32) || 'New Chat' } : c));
+  };
+
+  // Send a message in the current chat
+  const handleSend = async () => {
+    if (!input.trim() || activeChatIdx === -1) return;
+    setLoading(true);
+    setError('');
+    const newHistory = [...chats[activeChatIdx].history, { role: 'user', content: input }];
+    // Update chat history
+    setChats(prev => prev.map((c, i) => i === activeChatIdx ? { ...c, history: newHistory } : c));
+    setInput('');
+    try {
+      // Send the full chat history as context (user/ai turns)
+      const contextText = newHistory
+        .map(msg => (msg.role === 'user' ? `User: ${msg.content}` : `AI: ${msg.content}`))
+        .join('\n');
+      const response = await fetch('http://localhost:8000/ask', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ question: contextText }),
+      });
+      const data = await response.json();
+      if (response.ok && data.answer) {
+        setChats(prev => prev.map((c, i) =>
+          i === activeChatIdx ? { ...c, history: [...c.history, { role: 'ai', content: data.answer }] } : c
+        ));
+        // Set chat title if it's still 'New Chat'
+        if (newHistory.length === 1) updateChatTitle(activeChatIdx, input);
+      } else {
+        setError(data.answer || 'No answer received from server');
+      }
+    } catch (err) {
+      setError('Error: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  // Current chat history
+  const currentHistory = activeChatIdx !== -1 ? chats[activeChatIdx].history : [];
+
+  // Delete a chat
+  const handleDeleteChat = (idx, e) => {
+    e.stopPropagation();
+    setChats(prev => {
+      const newChats = prev.filter((_, i) => i !== idx);
+      // If the deleted chat was active, switch to next or clear
+      if (idx === activeChatIdx) {
+        if (newChats.length === 0) {
+          setActiveChatIdx(-1);
+        } else if (idx === 0) {
+          setActiveChatIdx(0);
+        } else {
+          setActiveChatIdx(idx - 1);
         }
-    };
+      } else if (idx < activeChatIdx) {
+        setActiveChatIdx(activeChatIdx - 1);
+      }
+      return newChats;
+    });
+  };
 
-    return (
-        <div className="flex h-screen bg-white">
-            {/* Sidebar with updated colors */}
-            <div className="w-64 bg-[#f0f6fe] border-r border-[#c2dcfe] text-[#4a8eff] flex flex-col h-full">
-                {/* Top section with new chat button */}
-                <div className="p-2 border-b border-[#c2dcfe]">
-                    <button className="flex items-center justify-between w-full p-3 rounded-md hover:bg-[#c2dcfe] transition-colors">
-                        <div className="flex items-center">
-                            <MessageSquare size={18} className="mr-2" />
-                            <span className="font-medium">InternLink AI</span>
-                        </div>
-                        <ChevronDown size={18} />
-                    </button>
-                </div>
+  useEffect(() => {
+    document.body.classList.toggle('dark-mode', theme === 'dark');
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
-                {/* Sections */}
-                <div className="flex-1 overflow-y-auto">
-
-                    {/* Today section */}
-                    <div className="p-2">
-                        <div className="text-xs text-[#4a8eff] font-medium px-3 py-1">Today</div>
-                        {conversations.slice(0, 8).map(conv => (
-                            <button key={conv.id} className="flex items-center w-full p-3 text-left rounded-md hover:bg-[#c2dcfe] transition-colors">
-                                <span className="truncate">{conv.title}</span>
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            {/* Main content */}
-            <div className="flex-1 flex flex-col h-full">
-                {/* Header */}
-                <header className="border-b border-[#c2dcfe] p-2 flex items-center justify-between">
-                    <div className="flex items-center">
-                        <button
-                            className="md:hidden p-2 rounded-md text-[#4a8eff] hover:bg-[#f0f6fe]"
-                            onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="3" y1="12" x2="21" y2="12"></line>
-                                <line x1="3" y1="6" x2="21" y2="6"></line>
-                                <line x1="3" y1="18" x2="21" y2="18"></line>
-                            </svg>
-                        </button>
-                        <div className="ml-2 flex items-center">
-                            <span className="font-semibold text-[#4a8eff]">InternLink</span>
-                            <span className="ml-1 bg-[#f0f6fe] text-[#4a8eff] px-2 py-0.5 rounded text-sm">AI Assistant</span>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center">
-                        <button className="p-1 rounded-full text-[#4a8eff] hover:bg-[#f0f6fe]">
-                            <Search size={20} />
-                        </button>
-                        <button className="ml-2 p-1 rounded-full bg-[#4a8eff] text-white">
-                            <User size={20} />
-                        </button>
-                    </div>
-                </header>
-
-                {/* Chat area */}
-                <div className="flex-1 overflow-y-auto p-4 bg-white">
-                    {messages.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center">
-                            <h1 className="text-3xl font-bold text-[#4a8eff] mb-6">What can I help with?</h1>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full">
-                                <button className="p-4 bg-[#f0f6fe] rounded-lg text-left hover:bg-[#c2dcfe] transition-colors">
-                                    <h3 className="font-medium text-[#4a8eff]">Find internships</h3>
-                                    <p className="text-gray-600 text-sm">Search for internships matching your skills</p>
-                                </button>
-                                <button className="p-4 bg-[#f0f6fe] rounded-lg text-left hover:bg-[#c2dcfe] transition-colors">
-                                    <h3 className="font-medium text-[#4a8eff]">Resume review</h3>
-                                    <p className="text-gray-600 text-sm">Get feedback on your resume</p>
-                                </button>
-                                <button className="p-4 bg-[#f0f6fe] rounded-lg text-left hover:bg-[#c2dcfe] transition-colors">
-                                    <h3 className="font-medium text-[#4a8eff]">Interview prep</h3>
-                                    <p className="text-gray-600 text-sm">Practice for your upcoming interviews</p>
-                                </button>
-                                <button className="p-4 bg-[#f0f6fe] rounded-lg text-left hover:bg-[#c2dcfe] transition-colors">
-                                    <h3 className="font-medium text-[#4a8eff]">Application tips</h3>
-                                    <p className="text-gray-600 text-sm">Learn how to stand out in applications</p>
-                                </button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            {messages.map((message, index) => (
-                                <div
-                                    key={index}
-                                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                                >
-                                    <div
-                                        className={`max-w-[80%] p-3 rounded-lg ${message.sender === 'user'
-                                                ? 'bg-[#4a8eff] text-white rounded-br-none'
-                                                : 'bg-[#f0f6fe] text-gray-800 rounded-bl-none'
-                                            }`}
-                                    >
-                                        {message.text}
-                                    </div>
-                                </div>
-                            ))}
-                            <div ref={messagesEndRef} />
-                        </div>
-                    )}
-                </div>
-
-                {/* Input area */}
-                <div className="border-t border-[#c2dcfe] p-4 bg-white">
-                    <form onSubmit={handleSendMessage} className="flex items-center">
-                        <div className="flex-1 relative">
-                            <input
-                                type="text"
-                                value={input}
-                                onChange={(e) => setInput(e.target.value)}
-                                placeholder="Ask anything..."
-                                className="w-full p-3 pr-10 border border-[#c2dcfe] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4a8eff] focus:border-transparent"
-                            />
-                            <button
-                                type="button"
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#4a8eff] hover:text-[#3a7eef]"
-                            >
-                                <Mic size={20} />
-                            </button>
-                        </div>
-                        <button
-                            type="submit"
-                            disabled={!input.trim()}
-                            className={`ml-2 p-3 rounded-lg ${input.trim()
-                                    ? 'bg-[#4a8eff] text-white hover:bg-[#3a7eef]'
-                                    : 'bg-[#f0f6fe] text-[#4a8eff] cursor-not-allowed'
-                                } transition-colors`}
-                        >
-                            <Send size={20} />
-                        </button>
-                    </form>
-                    <div className="mt-2 text-xs text-center text-gray-500">
-                        InternLink AI Assistant may produce inaccurate information about internships or companies.
-                    </div>
-                </div>
-            </div>
+  return (
+    <div className="ai-app-container">
+      {/* Sidebar */}
+      <aside className={`sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
+        <div className="sidebar-header">
+          <span className="sidebar-title">InternLink AI</span>
+          <button 
+            className="sidebar-toggle"
+            onClick={() => setSidebarCollapsed(true)}
+            title="Collapse sidebar"
+          >
+            ←
+          </button>
         </div>
-    );
-};
+        <nav className="sidebar-nav">
+          <div className="sidebar-section">Chats</div>
+          <button className="new-chat-btn" onClick={handleNewChat}>+ New chat</button>
+          <div className="search-container">
+            <input
+              type="text"
+              className="search-input"
+              placeholder="Search chats..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {searchQuery && (
+              <button 
+                className="clear-search-btn"
+                onClick={() => setSearchQuery('')}
+                title="Clear search"
+              >
+                ×
+              </button>
+            )}
+          </div>
+          <ul className="sidebar-list">
+            {filteredChats.map((chat, idx) => {
+              const originalIdx = chats.findIndex(c => c.id === chat.id);
+              return (
+                <li
+                  key={chat.id}
+                  className={originalIdx === activeChatIdx ? 'active' : ''}
+                  onClick={() => handleSelectChat(originalIdx)}
+                  title={chat.title}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
+                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{chat.title}</span>
+                  <button
+                    className="delete-chat-btn"
+                    title="Delete chat"
+                    onClick={e => handleDeleteChat(originalIdx, e)}
+                    style={{ marginLeft: 8, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="5" y="7" width="14" height="12" rx="2" fill="#e57373"/><rect x="9" y="3" width="6" height="2" rx="1" fill="#e57373"/><rect x="7" y="7" width="10" height="2" rx="1" fill="#fff"/><rect x="10" y="10" width="1.5" height="5" rx="0.75" fill="#fff"/><rect x="12.5" y="10" width="1.5" height="5" rx="0.75" fill="#fff"/></svg>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+      </aside>
 
-export default InternLinkAIAssistant;
+      {/* Main Content */}
+      <div className={`main-content chat-mode ${sidebarCollapsed ? 'expanded' : ''}`}>
+        {/* Top Bar */}
+        <header className="top-bar">
+          {sidebarCollapsed && (
+            <button 
+              className="sidebar-expand-btn"
+              onClick={() => setSidebarCollapsed(false)}
+              title="Expand sidebar"
+            >
+              →
+            </button>
+          )}
+          <span className="brand">Linky</span>
+          <span className="ai-label">AI Assistant</span>
+          <span className="user-icon"> <svg height="32" width="32" viewBox="0 0 32 32"><circle cx="16" cy="12" r="8" fill="#bcd6ff"/><ellipse cx="16" cy="28" rx="12" ry="6" fill="#eaf2ff"/></svg> </span>
+          <button
+            className="theme-toggle-btn"
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+            title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
+        </header>
+        {/* Chat Area */}
+        <div className="chat-area" style={{height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+          {currentHistory.length === 0 && (
+            <div className="chat-welcome" style={{width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+              <div className="assistant-illustration">
+                <img src={assets.LinkyImg} alt="Linky, the AI Intern Buddy" style={{ width: 600, maxWidth: '90vw', height: 'auto', display: 'block' }} />
+              </div>
+            </div>
+          )}
+          <div className="chat-history chat-bubbles">
+            {currentHistory.map((msg, idx) => (
+              <div key={idx} className={`chat-bubble ${msg.role === 'user' ? 'user' : 'ai'}`}> 
+                <div className="bubble-avatar">
+                  {msg.role === 'user' ? (
+                    <svg height="32" width="32" viewBox="0 0 32 32"><circle cx="16" cy="12" r="8" fill="#bcd6ff"/><ellipse cx="16" cy="28" rx="12" ry="6" fill="#eaf2ff"/></svg>
+                  ) : (
+                    <img src={assets.AiAvatar} alt="AI Assistant Avatar" style={{ width: 32, height: 32, borderRadius: '50%' }} />
+                  )}
+                </div>
+                <div className="bubble-content">
+                  <ReactMarkdown>{msg.content}</ReactMarkdown>
+                </div>
+              </div>
+            ))}
+            {loading && (
+              <div className="chat-bubble ai">
+                <div className="bubble-avatar">
+                  <svg height="32" width="32" viewBox="0 0 32 32"><circle cx="16" cy="12" r="8" fill="#3a7be0"/><ellipse cx="16" cy="28" rx="12" ry="6" fill="#eaf2ff"/></svg>
+                </div>
+                <div className="bubble-content loading">Thinking...</div>
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
+          {error && <div className="error">{error}</div>}
+        </div>
+        {/* Bottom Input Bar */}
+        <footer className="bottom-bar">
+          <input
+            className="chat-input"
+            placeholder="Ask anything..."
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleInputKeyDown}
+            disabled={loading || activeChatIdx === -1}
+          />
+          <button className="send-btn" aria-label="Send" onClick={handleSend} disabled={loading || !input.trim() || activeChatIdx === -1}>
+            <svg height="24" width="24" viewBox="0 0 24 24"><path d="M2 21l21-9-21-9v7l15 2-15 2z" fill="#5b9bff"/></svg>
+          </button>
+        </footer>
+        <div className="disclaimer">InternLink AI Assistant may produce inaccurate information about internships or companies.</div>
+      </div>
+    </div>
+  );
+}
+
+export default App;

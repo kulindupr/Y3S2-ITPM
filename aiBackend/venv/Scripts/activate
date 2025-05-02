@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\kulin\Desktop\rag_ai_assistant\aiBackend\venv"
+VIRTUAL_ENV="C:\Users\kulin\Desktop\SLIIT\Y3S2-ITPM\aiBackend\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

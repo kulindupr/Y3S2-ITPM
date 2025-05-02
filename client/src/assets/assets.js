@@ -36,6 +36,8 @@ import adobe_logo from './adobe_logo.png'
 import amazon_logo from './amazon_logo.png'
 import about from './aboutus.mp4'
 import cover from './cover.mp4'
+import LinkyImg from './linky.png'
+import AiAvatar from './AiAvatar.png'
 
 export const assets = {
     logo,
@@ -75,7 +77,9 @@ export const assets = {
     adobe_logo,
     amazon_logo,
     about,
-    cover
+    cover,
+    LinkyImg,
+    AiAvatar
 }
 
 export const JobCategories = [

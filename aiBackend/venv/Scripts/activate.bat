@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\kulin\Desktop\rag_ai_assistant\aiBackend\venv
+set VIRTUAL_ENV=C:\Users\kulin\Desktop\SLIIT\Y3S2-ITPM\aiBackend\venv
 
 if not defined PROMPT set PROMPT=$P$G
 
