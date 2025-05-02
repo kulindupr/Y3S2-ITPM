@@ -1,112 +1,380 @@
-import React from "react";
-import { Paper, Typography, Divider, Button, LinearProgress, Grid, Box } from "@mui/material";
+import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Paper, Typography, Box, Divider, Grid, Chip, LinearProgress, Link, Avatar, Fade, Button, Menu, MenuItem, Snackbar, Alert
+} from "@mui/material";
+import WorkIcon from '@mui/icons-material/Work';
+import SchoolIcon from '@mui/icons-material/School';
+import CodeIcon from '@mui/icons-material/Code';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import LanguageIcon from '@mui/icons-material/Language';
+import InterestsIcon from '@mui/icons-material/Interests';
+import DownloadIcon from '@mui/icons-material/Download';
+import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
+import Navbar from "./Navbar";
+import Footer from "./Footer";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
+import axios from "axios";
+
+const accent = "#1769aa";
+const accentGradient = "linear-gradient(90deg, #1769aa 0%, #00bcd4 100%)";
+const lightAccent = "#e3f2fd";
+
+const sectionTitle = (icon, text) => (
+  <Box display="flex" alignItems="center" mt={3} mb={1}>
+    {icon}
+    <Typography variant="h6" sx={{
+      color: accent, ml: 1,
+      letterSpacing: 1.5,
+      fontWeight: 700,
+      textTransform: "uppercase"
+    }}>{text}</Typography>
+    <Divider sx={{ flex: 1, ml: 2, borderColor: accent, opacity: 0.3 }} />
+  </Box>
+);
 
 const CVPreview = ({ data }) => {
   const navigate = useNavigate();
+  const printRef = useRef();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const [isSaving, setIsSaving] = useState(false);
+  const open = Boolean(anchorEl);
+
+  const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
+  const handleMenuClose = () => setAnchorEl(null);
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const handleSaveCV = async () => {
+    try {
+      setIsSaving(true);
+
+      // Ensure all required fields are present
+      const requiredFields = ['fullName', 'profession', 'address', 'phone', 'email', 'summary'];
+      const missingFields = requiredFields.filter(field => !data[field]);
+      
+      if (missingFields.length > 0) {
+        setSnackbar({
+          open: true,
+          message: `Missing required fields: ${missingFields.join(', ')}`,
+          severity: "error"
+        });
+        return;
+      }
+
+      // Add timestamp to CV data
+      const cvData = {
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const response = await axios.post('http://localhost:5000/api/cv', cvData);
+      console.log("Save response:", response.data);
+      
+      setSnackbar({
+        open: true,
+        message: "CV saved successfully!",
+        severity: "success"
+      });
+
+      // Store the CV ID in localStorage for future reference
+      if (response.data._id) {
+        localStorage.setItem('lastSavedCVId', response.data._id);
+      }
+
+    } catch (error) {
+      console.error("Error details:", error.response?.data || error.message);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || "Error saving CV. Please try again.",
+        severity: "error"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    // Hide elements not needed in PDF
+    const navbar = document.querySelector('.navbar');
+    const footer = document.querySelector('.footer');
+    if (navbar) navbar.style.display = 'none';
+    if (footer) footer.style.display = 'none';
+
+    const element = printRef.current;
+    const canvas = await html2canvas(element, { scale: 2 });
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    
+    // Restore hidden elements
+    if (navbar) navbar.style.display = 'block';
+    if (footer) footer.style.display = 'block';
+
+    const fileName = data.fullName 
+      ? `${data.fullName.replace(/\s+/g, "_")}_CV.pdf`
+      : "cv.pdf";
+    pdf.save(fileName);
+  };
+
+  const handleEditCV = () => {
+    navigate(-1);
+  };
 
   if (!data) {
     return <Typography variant="h6" align="center">No CV data available. Please fill out the form.</Typography>;
   }
 
   return (
-
-    
-    <Paper
-      elevation={5}
-      style={{
-        padding: 30,
-        maxWidth: 900,
-        margin: "auto",
-        borderRadius: 10,
-        backgroundColor: "#f5faff", // Light blue background
-        color: "#003366", // Dark blue text
-      }}
-    >
-      {/* Header Section */}
-      <Box textAlign="center" mb={2} style={{ backgroundColor: "#003366", padding: 20, borderRadius: "10px 10px 0 0", color: "white" }}>
-        <Typography variant="h4" gutterBottom>{data.fullName}</Typography>
-        <Typography variant="subtitle1">{data.email} | {data.phone} | {data.address}</Typography>
-        {data.linkedin && (
-          <Typography variant="subtitle1">
-            <a href={data.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: "white" }}>
-              {data.linkedin}
-            </a>
-          </Typography>
-        )}
-      </Box>
-
-      {/* Summary Section */}
-      <Typography variant="h5" color="#003366" gutterBottom>Personal Profile</Typography>
-      <Typography>{data.summary}</Typography>
-      <Divider style={{ margin: "10px 0", backgroundColor: "#003366" }} />
-
-      {/* Education Section */}
-      <Typography variant="h5" color="#003366" gutterBottom>Education</Typography>
-      {data.education.length > 0 ? (
-        data.education.map((edu, index) => (
-          <Box key={index} mb={2}>
-            <Typography variant="body1">
-              <strong>{edu.degree}</strong> - {edu.institution} ({edu.year})
-            </Typography>
-          </Box>
-        ))
-      ) : (
-        <Typography>No education added</Typography>
-      )}
-      <Divider style={{ margin: "10px 0", backgroundColor: "#003366" }} />
-
-      {/* Experience Section */}
-      <Typography variant="h5" color="#003366" gutterBottom>Experience</Typography>
-      {data.experience.length > 0 ? (
-        data.experience.map((exp, index) => (
-          <Box key={index} mb={2}>
-            <Typography variant="body1">
-              <strong>{exp.title}</strong> at {exp.company} ({exp.years} years)
-            </Typography>
-          </Box>
-        ))
-      ) : (
-        <Typography>No experience added</Typography>
-      )}
-      <Divider style={{ margin: "10px 0", backgroundColor: "#003366" }} />
-
-      {/* Skills Section with Progress Bars */}
-      <Typography variant="h5" color="#003366" gutterBottom>Skills</Typography>
-      {data.skills.length > 0 ? (
-        data.skills.map((skill, index) => (
-          <Grid container spacing={2} alignItems="center" key={index} style={{ marginBottom: 10 }}>
-            <Grid item xs={4}>
-              <Typography>{skill.skill}</Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <LinearProgress
-                variant="determinate"
-                value={parseInt(skill.percentage, 10)}
-                style={{ height: 10, borderRadius: 5, backgroundColor: "#99c2ff" }} // Blue progress bar
-              />
-            </Grid>
-            <Grid item xs={2}>
-              <Typography>{skill.percentage}%</Typography>
-            </Grid>
-          </Grid>
-        ))
-      ) : (
-        <Typography>No skills added</Typography>
-      )}
-      <Divider style={{ margin: "10px 0", backgroundColor: "#003366" }} />
-
-      {/* Edit Button */}
-      <Box textAlign="center" mt={3}>
+    <>
+      <Navbar className="navbar" />
+      
+      {/* Action Buttons */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, my: 3 }}>
         <Button
           variant="contained"
-          onClick={() => navigate("/cv-form")}
-          style={{ backgroundColor: "#003366", color: "white", padding: "10px 20px", borderRadius: 8 }}
+          startIcon={<EditIcon />}
+          onClick={handleEditCV}
+          sx={{
+            backgroundColor: "#e3f2fd",
+            color: "#1769aa",
+            '&:hover': { backgroundColor: "#bbdefb" }
+          }}
         >
           Edit CV
         </Button>
+
+        <Button
+          variant="contained"
+          startIcon={<SaveIcon />}
+          onClick={handleSaveCV}
+          disabled={isSaving}
+          sx={{
+            backgroundColor: "#4caf50",
+            color: "#ffffff",
+            '&:hover': { backgroundColor: "#388e3c" }
+          }}
+        >
+          {isSaving ? "Saving..." : "Save CV"}
+        </Button>
+
+        <Button
+          variant="contained"
+          startIcon={<DownloadIcon />}
+          onClick={handleMenuClick}
+          sx={{
+            background: accentGradient,
+            color: "#ffffff",
+            '&:hover': { opacity: 0.9 }
+          }}
+        >
+          Download CV
+        </Button>
+
+        <Menu
+          anchorEl={anchorEl}
+          open={open}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={handleDownloadPdf}>PDF Format</MenuItem>
+        </Menu>
       </Box>
-    </Paper>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      {/* CV Content */}
+      <div ref={printRef}>
+        <Fade in timeout={900}>
+          <Box sx={{
+            minHeight: "100vh",
+            background: "radial-gradient(circle at 60% 15%, #e3f2fd 0%, #f8fafc 100%)",
+            py: 6,
+            px: 1
+          }}>
+            <Paper elevation={8} sx={{
+              p: 0, maxWidth: 1100, mx: "auto", borderRadius: 5,
+              overflow: "hidden",
+              background: "rgba(255,255,255,0.95)",
+              boxShadow: "0 8px 32px 0 rgba(23,105,170,0.12)"
+            }}>
+              {/* Header Section */}
+              <Box sx={{
+                background: accentGradient,
+                color: "white",
+                p: { xs: 3, md: 5 },
+                textAlign: "center",
+                position: "relative"
+              }}>
+                <Avatar
+                  src={data.avatarUrl}
+                  alt={data.fullName}
+                  sx={{
+                    width: 110, height: 110, mx: "auto", mb: 2,
+                    border: "4px solid #fff",
+                    boxShadow: "0 4px 16px rgba(23,105,170,0.2)",
+                    background: "#fff",
+                    color: accent,
+                    fontSize: 48
+                  }}
+                />
+                <Typography variant="h3" fontWeight="bold" letterSpacing={2}>
+                  {data.fullName}
+                </Typography>
+                <Typography variant="h5" sx={{ mt: 1, opacity: 0.9 }}>
+                  {data.profession}
+                </Typography>
+                <Typography variant="subtitle1" sx={{ mt: 1, opacity: 0.8 }}>
+                  {data.email} | {data.phone} | {data.address}
+                </Typography>
+                <Box sx={{ mt: 2 }}>
+                  {data.linkedin && <Link href={data.linkedin} target="_blank" rel="noopener" color="inherit" underline="hover" sx={{ mx: 1 }}>LinkedIn</Link>}
+                  {data.github && <Link href={data.github} target="_blank" rel="noopener" color="inherit" underline="hover" sx={{ mx: 1 }}>GitHub</Link>}
+                  {data.portfolio && <Link href={data.portfolio} target="_blank" rel="noopener" color="inherit" underline="hover" sx={{ mx: 1 }}>Portfolio</Link>}
+                </Box>
+              </Box>
+
+              {/* Main Content */}
+              <Grid container spacing={0}>
+                {/* Left Column */}
+                <Grid item xs={12} md={4} sx={{
+                  background: "linear-gradient(180deg, #e3f2fd 80%, #fff 100%)",
+                  p: { xs: 3, md: 4 },
+                  minHeight: "100%",
+                  borderRight: { md: `2px solid ${lightAccent}` }
+                }}>
+                  {/* Profile */}
+                  <Box mb={3}>
+                    <Typography variant="subtitle1" fontWeight="bold" sx={{ color: accent, mb: 1, letterSpacing: 1 }}>Profile</Typography>
+                    <Typography variant="body1" sx={{ opacity: 0.85 }}>{data.summary}</Typography>
+                  </Box>
+                  
+                  {/* Skills */}
+                  {sectionTitle(<CodeIcon sx={{ color: accent }} />, "Skills")}
+                  {data.skills?.map((skill, idx) => (
+                    <Box key={idx} sx={{ mb: 1 }}>
+                      <Typography variant="body2" fontWeight="bold">{skill.skill}</Typography>
+                      <LinearProgress
+                        variant="determinate"
+                        value={parseInt(skill.percentage, 10)}
+                        sx={{
+                          height: 10, borderRadius: 5, background: "#bbdefb",
+                          "& .MuiLinearProgress-bar": { background: accentGradient }
+                        }}
+                      />
+                    </Box>
+                  ))}
+
+                  {/* Languages */}
+                  {sectionTitle(<LanguageIcon sx={{ color: accent }} />, "Languages")}
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                    {data.languages?.map((lang, idx) => (
+                      <Chip key={idx} label={`${lang.language} (${lang.level})`} sx={{
+                        background: accentGradient, color: "white", fontWeight: 600, letterSpacing: 1
+                      }} />
+                    ))}
+                  </Box>
+
+                  {/* Interests */}
+                  {sectionTitle(<InterestsIcon sx={{ color: accent }} />, "Interests")}
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                    {data.interests?.map((interest, idx) => (
+                      <Chip key={idx} label={interest} sx={{
+                        background: "#fff", color: accent, border: `1px solid ${accent}`,
+                        fontWeight: 600, letterSpacing: 1
+                      }} />
+                    ))}
+                  </Box>
+                </Grid>
+
+                {/* Right Column */}
+                <Grid item xs={12} md={8} sx={{ p: { xs: 3, md: 5 } }}>
+                  {/* Experience */}
+                  {sectionTitle(<WorkIcon sx={{ color: accent }} />, "Experience")}
+                  {data.experience?.map((exp, idx) => (
+                    <Box key={idx} mb={3} sx={{
+                      background: "#f4fafd",
+                      borderRadius: 2,
+                      p: 2,
+                      boxShadow: "0 2px 8px rgba(23,105,170,0.07)"
+                    }}>
+                      <Typography variant="subtitle1" fontWeight="bold">
+                        {exp.title} <span style={{ color: accent }}>@ {exp.company}</span>
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">{exp.years}</Typography>
+                      <Typography variant="body2" sx={{ mb: 1, mt: 1, opacity: 0.9 }}>{exp.description}</Typography>
+                    </Box>
+                  ))}
+
+                  {/* Education */}
+                  {sectionTitle(<SchoolIcon sx={{ color: accent }} />, "Education")}
+                  {data.education?.map((edu, idx) => (
+                    <Box key={idx} mb={2} sx={{
+                      background: "#f8fafc",
+                      borderRadius: 2,
+                      p: 2,
+                      boxShadow: "0 1px 4px rgba(23,105,170,0.05)"
+                    }}>
+                      <Typography variant="subtitle1" fontWeight="bold">{edu.degree}</Typography>
+                      <Typography variant="body2" color="text.secondary">{edu.institution} ({edu.year})</Typography>
+                    </Box>
+                  ))}
+
+                  {/* Projects */}
+                  {sectionTitle(<CodeIcon sx={{ color: accent }} />, "Projects")}
+                  {data.projects?.map((proj, idx) => (
+                    <Box key={idx} mb={2} sx={{
+                      background: "#f4fafd",
+                      borderRadius: 2,
+                      p: 2,
+                      boxShadow: "0 1px 4px rgba(23,105,170,0.05)"
+                    }}>
+                      <Typography variant="subtitle1" fontWeight="bold">{proj.name}</Typography>
+                      <Typography variant="body2">{proj.description}</Typography>
+                      {proj.link && <Link href={proj.link} target="_blank" rel="noopener" sx={{ color: accent, fontWeight: 600 }}>View Project</Link>}
+                    </Box>
+                  ))}
+
+                  {/* Certifications */}
+                  {sectionTitle(<EmojiEventsIcon sx={{ color: accent }} />, "Certifications")}
+                  {data.certifications?.map((cert, idx) => (
+                    <Box key={idx} mb={2} sx={{
+                      background: "#f8fafc",
+                      borderRadius: 2,
+                      p: 2,
+                      boxShadow: "0 1px 4px rgba(23,105,170,0.05)"
+                    }}>
+                      <Typography variant="subtitle1" fontWeight="bold">{cert.name}</Typography>
+                      <Typography variant="body2">{cert.issuer} ({cert.year})</Typography>
+                    </Box>
+                  ))}
+                </Grid>
+              </Grid>
+            </Paper>
+          </Box>
+        </Fade>
+      </div>
+
+      <Footer className="footer" />
+    </>
   );
 };
 
