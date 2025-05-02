@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Paper, Typography, Box, Divider, Grid, Chip, LinearProgress, Link, Avatar, Fade, Button, Menu, MenuItem
+  Paper, Typography, Box, Divider, Grid, Chip, LinearProgress, Link, Avatar, Fade, Button, Menu, MenuItem, Snackbar, Alert
 } from "@mui/material";
 import WorkIcon from '@mui/icons-material/Work';
 import SchoolIcon from '@mui/icons-material/School';
@@ -11,10 +11,12 @@ import LanguageIcon from '@mui/icons-material/Language';
 import InterestsIcon from '@mui/icons-material/Interests';
 import DownloadIcon from '@mui/icons-material/Download';
 import EditIcon from '@mui/icons-material/Edit';
+import SaveIcon from '@mui/icons-material/Save';
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import axios from "axios";
 
 const accent = "#1769aa";
 const accentGradient = "linear-gradient(90deg, #1769aa 0%, #00bcd4 100%)";
@@ -37,10 +39,66 @@ const CVPreview = ({ data }) => {
   const navigate = useNavigate();
   const printRef = useRef();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+  const [isSaving, setIsSaving] = useState(false);
   const open = Boolean(anchorEl);
 
   const handleMenuClick = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
+
+  const handleSaveCV = async () => {
+    try {
+      setIsSaving(true);
+
+      // Ensure all required fields are present
+      const requiredFields = ['fullName', 'profession', 'address', 'phone', 'email', 'summary'];
+      const missingFields = requiredFields.filter(field => !data[field]);
+      
+      if (missingFields.length > 0) {
+        setSnackbar({
+          open: true,
+          message: `Missing required fields: ${missingFields.join(', ')}`,
+          severity: "error"
+        });
+        return;
+      }
+
+      // Add timestamp to CV data
+      const cvData = {
+        ...data,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const response = await axios.post('http://localhost:5000/api/cv', cvData);
+      console.log("Save response:", response.data);
+      
+      setSnackbar({
+        open: true,
+        message: "CV saved successfully!",
+        severity: "success"
+      });
+
+      // Store the CV ID in localStorage for future reference
+      if (response.data._id) {
+        localStorage.setItem('lastSavedCVId', response.data._id);
+      }
+
+    } catch (error) {
+      console.error("Error details:", error.response?.data || error.message);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || "Error saving CV. Please try again.",
+        severity: "error"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const handleDownloadPdf = async () => {
     // Hide elements not needed in PDF
@@ -68,10 +126,8 @@ const CVPreview = ({ data }) => {
     pdf.save(fileName);
   };
 
-
-
   const handleEditCV = () => {
-    navigate(-1); // Go back to previous page (CV form)
+    navigate(-1);
   };
 
   if (!data) {
@@ -99,6 +155,20 @@ const CVPreview = ({ data }) => {
 
         <Button
           variant="contained"
+          startIcon={<SaveIcon />}
+          onClick={handleSaveCV}
+          disabled={isSaving}
+          sx={{
+            backgroundColor: "#4caf50",
+            color: "#ffffff",
+            '&:hover': { backgroundColor: "#388e3c" }
+          }}
+        >
+          {isSaving ? "Saving..." : "Save CV"}
+        </Button>
+
+        <Button
+          variant="contained"
           startIcon={<DownloadIcon />}
           onClick={handleMenuClick}
           sx={{
@@ -116,9 +186,20 @@ const CVPreview = ({ data }) => {
           onClose={handleMenuClose}
         >
           <MenuItem onClick={handleDownloadPdf}>PDF Format</MenuItem>
-          
         </Menu>
       </Box>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
 
       {/* CV Content */}
       <div ref={printRef}>

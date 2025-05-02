@@ -10,6 +10,7 @@ import companyRoutes from './routes/companyRoutes.js';
 import connectCloudinary from './config/cloudinary.js';
 import jobRoutes from './routes/jobRotes.js';
 import userRoutes from './routes/userroutes.js';
+import cvRoutes from './routes/cvRoutes.js';
 import {clerkMiddleware} from '@clerk/express';
 
 
@@ -37,6 +38,7 @@ app.get("/debug-sentry", function mainHandler(req, res) {
   app.use('/api/company', companyRoutes);
   app.use('/api/jobs', jobRoutes);
   app.use('/api/users', userRoutes);
+  app.use('/api/cv', cvRoutes);
 
 
 //port
