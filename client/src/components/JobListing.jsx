@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from '../context/AppContext';
-import { JobCategories, ITCategories, BusinessCategories, EngineerCategories, internships, assets } from '../assets/assets';
+import { JobCategories, ITCategories, BusinessCategories, EngineerCategories, jobsData, assets } from '../assets/assets';
 import JobCard from './JobCard';  // Import the JobCard component
 
 const JobListing = () => {
@@ -23,9 +23,9 @@ const JobListing = () => {
   };
 
   // Filter internships based on selected category and subcategory
-  const filteredInternships = internships.filter((internship) => {
-    const matchesCategory = searchFilter.category ? internship.category === searchFilter.category : true;
-    const matchesSubcategory = searchFilter.subcategory ? internship.subcategory === searchFilter.subcategory : true;
+  const filteredInternships = jobsData.filter((job) => {
+    const matchesCategory = searchFilter.category ? job.category === searchFilter.category : true;
+    const matchesSubcategory = searchFilter.subcategory ? job.subcategory === searchFilter.subcategory : true;
     return matchesCategory && matchesSubcategory;
   });
 
@@ -91,8 +91,8 @@ const JobListing = () => {
         {/* Display filtered internships */}
         {filteredInternships.length > 0 ? (
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {currentInternships.map((internship, index) => (
-              <JobCard key={index} internship={internship} />
+            {currentInternships.map((job, index) => (
+              <JobCard key={index} job={job} />
             ))}
           </div>
         ) : (
