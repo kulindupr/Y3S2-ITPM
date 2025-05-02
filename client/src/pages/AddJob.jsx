@@ -4,6 +4,7 @@ import { JobCategories, JobLocations } from '../assets/assets';
 import axios from 'axios';
 import { AppContext } from '../context/AppContext';
 import { toast } from 'react-toastify';
+import { useLocation } from 'react-router-dom';
 
 const AddJob = () => {
 
@@ -17,44 +18,61 @@ const AddJob = () => {
     const quillRef = useRef(null)
 
     const { backendUrl, companyToken } = useContext(AppContext)
+    const { state } = useLocation();
+
+    useEffect(() => {
+        // If editing, pre-fill the form with the job's data
+        if (state && state.job) {
+            const { title, location, category, level, salary, description } = state.job;
+            setTitle(title);
+            setLocation(location);
+            setCategory(category);
+            setLevel(level);
+            setSalary(salary);
+            if (quillRef.current) {
+                quillRef.current.root.innerHTML = description;
+            }
+        }
+    }, [state]);
 
     const onSubmitHandler = async (e) => {
         e.preventDefault()
 
         try {
+            const description = quillRef.current.root.innerHTML;
 
-            const description = quillRef.current.root.innerHTML
+            const endpoint = state && state.job ? '/api/company/update-job' : '/api/company/post-job';
+            const payload = state && state.job ? { id: state.job._id, title, description, location, salary, category, level } : { title, description, location, salary, category, level };
 
-            const { data } = await axios.post(backendUrl + '/api/company/post-job',
-                { title, description, location, salary, category, level },
+            const { data } = await axios.post(backendUrl + endpoint,
+                payload,
                 { headers: { token: companyToken } }
             )
 
             if (data.success) {
-                toast.success(data.message)
-                setTitle('')
-                setSalary(0)
-                quillRef.current.root.innerHTML = ""
+                toast.success(data.message);
+                if (!state || !state.job) {
+                    setTitle('');
+                    setSalary(0);
+                    quillRef.current.root.innerHTML = "";
+                }
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
 
         } catch (error) {
-            toast.error(error.message)
+            toast.error(error.message);
         }
-
-
     }
 
-
     useEffect(() => {
-        // Initiate Qill only once
+        // Initiate Quill only once
         if (!quillRef.current && editorRef.current) {
             quillRef.current = new Quill(editorRef.current, {
                 theme: 'snow',
-            })
+            });
         }
-    }, [])
+    }, []);
 
     return (
         <form onSubmit={onSubmitHandler} className='container p-4 flex flex-col w-full items-start gap-3'>
@@ -70,16 +88,14 @@ const AddJob = () => {
 
             <div className='w-full max-w-lg'>
                 <p className='my-2'>Job Description</p>
-                <div ref={editorRef}>
-
-                </div>
+                <div ref={editorRef}></div>
             </div>
 
             <div className='flex flex-col sm:flex-row gap-2 w-full sm:gap-8'>
 
                 <div>
                     <p className='mb-2'>Job Category</p>
-                    <select className='w-full px-3 py-2 border-2 border-gray-300 rounded' onChange={e => setCategory(e.target.value)}>
+                    <select className='w-full px-3 py-2 border-2 border-gray-300 rounded' value={category} onChange={e => setCategory(e.target.value)}>
                         {JobCategories.map((category, index) => (
                             <option key={index} value={category}>{category}</option>
                         ))}
@@ -88,7 +104,7 @@ const AddJob = () => {
 
                 <div>
                     <p className='mb-2'>Job Location</p>
-                    <select className='w-full px-3 py-2 border-2 border-gray-300 rounded' onChange={e => setLocation(e.target.value)}>
+                    <select className='w-full px-3 py-2 border-2 border-gray-300 rounded' value={location} onChange={e => setLocation(e.target.value)}>
                         {JobLocations.map((location, index) => (
                             <option key={index} value={location}>{location}</option>
                         ))}
@@ -97,7 +113,7 @@ const AddJob = () => {
 
                 <div>
                     <p className='mb-2'>Job Level</p>
-                    <select className='w-full px-3 py-2 border-2 border-gray-300 rounded' onChange={e => setLevel(e.target.value)}>
+                    <select className='w-full px-3 py-2 border-2 border-gray-300 rounded' value={level} onChange={e => setLevel(e.target.value)}>
                         <option value="Beginner level">Beginner level</option>
                         <option value="Intermediate level">Intermediate level</option>
                         <option value="Senior level">Senior level</option>
@@ -107,10 +123,10 @@ const AddJob = () => {
             </div>
             <div>
                 <p className='mb-2'>Job Salary</p>
-                <input min={0} className='w-full px-3 py-2 border-2 border-gray-300 rounded sm:w-[120px]' onChange={e => setSalary(e.target.value)} type="Number" placeholder='2500' />
+                <input min={0} className='w-full px-3 py-2 border-2 border-gray-300 rounded sm:w-[120px]' value={salary} onChange={e => setSalary(e.target.value)} type="Number" placeholder='2500' />
             </div>
 
-            <button className='w-28 py-3 mt-4 bg-black text-white rounded'>ADD</button>
+            <button className='w-28 py-3 mt-4 bg-black text-white rounded'>{state && state.job ? 'Update' : 'Add'}</button>
         </form>
     )
 }

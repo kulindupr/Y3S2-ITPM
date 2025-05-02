@@ -80,18 +80,26 @@ const ManageJobs = () => {
               <th className='py-2 px-4 border-b text-left max-sm:hidden'>Location</th>
               <th className='py-2 px-4 border-b text-center'>Applicants</th>
               <th className='py-2 px-4 border-b text-left'>Visible</th>
+              <th className='py-2 px-4 border-b text-left'>Actions</th>
             </tr>
           </thead>
           <tbody>
             {jobs.map((job, index) => (
               <tr key={index} className='text-gray-700'>
                 <td className='py-2 px-4 border-b max-sm:hidden'>{index + 1}</td>
-                <td className='py-2 px-4 border-b' >{job.title}</td>
-                <td className='py-2 px-4 border-b max-sm:hidden' >{moment(job.date).format('ll')}</td>
-                <td className='py-2 px-4 border-b max-sm:hidden' >{job.location}</td>
-                <td className='py-2 px-4 border-b text-center' >{job.applicants}</td>
-                <td className='py-2 px-4 border-b' >
-                  <input onChange={() => changeJobVisiblity(job._id)} className='scale-125 ml-4' type="checkbox" checked={job.visible} />
+                <td className='py-2 px-4 border-b'>{job.title}</td>
+                <td className='py-2 px-4 border-b max-sm:hidden'>{moment(job.date).format('ll')}</td>
+                <td className='py-2 px-4 border-b max-sm:hidden'>{job.location}</td>
+                <td className='py-2 px-4 border-b text-center'>{job.applicants}</td>
+                <td className='py-2 px-4 border-b'>
+                  <input onChange={() => changeJobVisiblity(job._id)} className='scale-125 ml-4' type='checkbox' checked={job.visible} />
+                </td>
+                <td className='py-2 px-4 border-b'>
+                  <button
+                    onClick={() => navigate('/dashboard/add-job', { state: { job } })}
+                    className='bg-blue-500 text-white py-1 px-2 rounded'>
+                    Edit
+                  </button>
                 </td>
               </tr>
             ))}
