@@ -9,7 +9,7 @@ import { useLocation } from 'react-router-dom';
 const AddJob = () => {
 
     const [title, setTitle] = useState('');
-    const [location, setLocation] = useState('Bangalore');
+    const [location, setLocation] = useState('Matara');
     const [category, setCategory] = useState('Programming');
     const [level, setLevel] = useState('Beginner level');
     const [salary, setSalary] = useState(0);
