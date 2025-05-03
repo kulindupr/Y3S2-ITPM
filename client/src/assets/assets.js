@@ -90,13 +90,13 @@ export const JobCategories = [
 ]
 
 export const JobLocations = [
-    "Bangalore",
-    "Washington",
-    "Hyderabad",
-    "Mumbai",
-    "California",
-    "Chennai",
-    "New York"
+    "Colombo",
+    "Nugegoda",
+    "Matara",
+    "Kaduwela",
+    "Galle",
+    "Gampaha",
+    "Kurunegala",
 ]
 
 // Sample data for Manage Jobs Page
