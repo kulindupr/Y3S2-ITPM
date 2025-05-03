@@ -216,3 +216,55 @@ export const changeVisiblity = async (req, res) => {
         res.json({ success: false, message: error.message })
     }
 }
+
+// Update job details
+export const updateJob = async (req, res) => {
+    const { id, title, description, location, salary, level, category } = req.body;
+
+    try {
+        const job = await Job.findById(id);
+
+        if (!job) {
+            return res.status(404).json({ success: false, message: 'Job not found' });
+        }
+
+        // Update job fields
+        job.title = title;
+        job.description = description;
+        job.location = location;
+        job.salary = salary;
+        job.level = level;
+        job.category = category;
+
+        await job.save();
+
+        res.json({ success: true, message: 'Job updated successfully', job });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+
+
+}// Delete Job
+export const deleteJob = async (req, res) => {
+  try {
+    const { id } = req.body;
+    const companyId = req.company._id;
+
+    const job = await Job.findById(id);
+
+    if (!job) {
+      return res.status(404).json({ success: false, message: 'Job not found' });
+    }
+
+    if (job.companyId.toString() !== companyId.toString()) {
+      return res.status(403).json({ success: false, message: 'Unauthorized' });
+    }
+
+    await job.deleteOne();
+
+    res.json({ success: true, message: 'Job deleted successfully' });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
