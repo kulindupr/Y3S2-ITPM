@@ -1,3 +1,4 @@
+"use client"
 
 import { useContext, useRef } from "react"
 import { assets } from "../assets/assets"
@@ -8,7 +9,6 @@ const Hero = () => {
 
   const titleRef = useRef(null)
   const locationRef = useRef(null)
-  const videoRef = useRef(null)
 
   const onSearch = () => {
     setSearchFilter({
@@ -22,17 +22,25 @@ const Hero = () => {
     <div className="container 2xl:px-20 mx-auto my-10">
       <div className="relative overflow-hidden rounded-xl mx-2">
         {/* Video Background */}
-        <video ref={videoRef} autoPlay loop muted className="absolute w-full h-full object-cover">
-          <source src={assets.about} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+        <div className="absolute inset-0 w-full h-full">
+          <video
+            className="absolute inset-0 w-full h-full object-cover object-center"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="none"
+          >
+            <source src="/videos/hero-background.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          {/* Overlay to ensure text is readable */}
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-800/30 to-purple-950/30"></div>
+        </div>
 
-        {/* Overlay to ensure text readability */}
-        <div className="absolute inset-0 bg-purple-900/70"></div>
-
-        {/* Hero Content */}
-        <div className="relative text-white py-16 text-center z-10">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-medium mb-4">Find Your Dream Internship</h2>
+        {/* Content (same as original) */}
+        <div className="relative text-white py-16 text-center">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-medium mb-4">Over 10,000+ jobs to apply</h2>
           <p className="mb-8 max-w-xl mx-auto text-sm font-light px-5">
             Your Next Big Career Move Starts Right Here - Explore the Best Job Opportunities and Take the First Step
             Toward Your Future!
