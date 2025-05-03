@@ -31,7 +31,9 @@ const Hero = () => {
             playsInline
             preload="none"
           >
-            <source src="/videos/hero-background.mp4" type="video/mp4" />
+
+            <source src={assets.about} type="video/mp4" />
+
             Your browser does not support the video tag.
           </video>
           {/* Overlay to ensure text is readable */}
