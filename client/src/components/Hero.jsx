@@ -37,7 +37,7 @@ const Hero = () => {
             Your Next Big Career Move Starts Right Here - Explore the Best Job Opportunities and Take the First Step
             Toward Your Future!
           </p>
-          <div className="flex items-center justify-between bg-white rounded text-gray-600 max-w-xl pl-4 mx-4 sm:mx-auto">
+          {/* <div className="flex items-center justify-between bg-white rounded text-gray-600 max-w-xl pl-4 mx-4 sm:mx-auto">
             <div className="flex items-center">
               <img className="h-4 sm:h-5" src={assets.search_icon || "/placeholder.svg"} alt="" />
               <input
@@ -59,7 +59,7 @@ const Hero = () => {
             <button onClick={onSearch} className="bg-blue-600 px-6 py-2 rounded text-white m-1">
               Search
             </button>
-          </div>
+          </div> */}
         </div>
       </div>
 

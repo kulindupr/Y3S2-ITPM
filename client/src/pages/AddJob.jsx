@@ -42,12 +42,15 @@ const AddJob = () => {
             const description = quillRef.current.root.innerHTML;
 
             const endpoint = state && state.job ? '/api/company/update-job' : '/api/company/post-job';
+            const method = state && state.job ? 'put' : 'post';
             const payload = state && state.job ? { id: state.job._id, title, description, location, salary, category, level } : { title, description, location, salary, category, level };
 
-            const { data } = await axios.post(backendUrl + endpoint,
-                payload,
-                { headers: { token: companyToken } }
-            )
+            const { data } = await axios({
+                method,
+                url: backendUrl + endpoint,
+                data: payload,
+                headers: { token: companyToken }
+            });
 
             if (data.success) {
                 toast.success(data.message);
