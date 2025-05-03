@@ -2,7 +2,7 @@ import express from 'express'
 import { ChangeJobApplicationsStatus, changeVisiblity, getCompanyData, getCompanyJobApplicants, getCompanyPostedJobs, loginCompany, postJob, registerCompany, updateJob } from '../controllers/companyController.js'
 import upload from '../config/multer.js'
 import { protectCompany } from '../middleware/authMiddleware.js'
-
+import { deleteJob } from '../controllers/companyController.js'
 const router = express.Router()
 
 // Register a company
@@ -31,5 +31,7 @@ router.post('/change-visiblity', protectCompany, changeVisiblity)
 
 // Update job details
 router.put('/update-job', protectCompany, updateJob)
+// Add this line with your other protected routes
+router.post('/delete-job', protectCompany, deleteJob)
 
 export default router
